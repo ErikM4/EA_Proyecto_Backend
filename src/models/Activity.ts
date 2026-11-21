@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type ActivityCategory = 'SPORT' | 'LEISURE';
-export type ActivitySubcategory = 'BASKETBALL' | 'RUNNING' | 'ARCADE' | 'TCG_BOARDGAMES';
+export type ActivityCategory = string;
+export type ActivitySubcategory = string;
 export type ActivityModality = 'CASUAL' | 'ORGANIZED';
 export type ActivityStatus = 'OPEN' | 'FULL' | 'COMPLETED' | 'CANCELLED';
 
@@ -69,11 +69,12 @@ const ActivitySchema: Schema = new Schema(
         creatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         title: { type: String, required: true, trim: true },
         description: { type: String, required: true, trim: true },
-        category: { type: String, enum: ['SPORT', 'LEISURE'], required: true },
+        category: { type: String, required: true, uppercase: true, trim: true },
         subcategory: {
             type: String,
-            enum: ['BASKETBALL', 'RUNNING', 'ARCADE', 'TCG_BOARDGAMES'],
-            required: true
+            required: true,
+            uppercase: true,
+            trim: true
         },
         modality: { type: String, enum: ['CASUAL', 'ORGANIZED'], default: 'CASUAL' },
         status: {

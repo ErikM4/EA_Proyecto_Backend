@@ -161,3 +161,22 @@ export const getSeedReports = (reporterId: string, activityId: string): Partial<
         adminNotes: 'En revisión por el equipo de soporte.'
     }
 ];
+
+export const getSeedCategories = (): { name: string; slug: string; subcategories: { name: string; slug: string }[] }[] => [
+    {
+        name: 'Deportes',
+        slug: 'SPORT',
+        subcategories: [
+            { name: 'Baloncesto', slug: 'BASKETBALL' },
+            { name: 'Running', slug: 'RUNNING' }
+        ]
+    },
+    {
+        name: 'Ocio',
+        slug: 'LEISURE',
+        subcategories: [
+            { name: 'Arcade', slug: 'ARCADE' },
+            { name: 'Juegos de mesa y TCG', slug: 'TCG_BOARDGAMES' }
+        ]
+    }
+];

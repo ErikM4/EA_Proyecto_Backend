@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { IUser } from '../models/User';
 import { IActivity } from '../models/Activity';
 import { IReport } from '../models/Report';
+import { ICategory } from '../models/Category';
 
 // Función que valida los datos del body.
 // stripUnknown: true elimina automáticamente campos de sistema (_id, createdAt, etc.) sin lanzar error 422.
@@ -87,8 +88,8 @@ export const Schemas = {
             creatorId: Joi.string().regex(OBJECT_ID).optional(),
             title: Joi.string().required().example('Pachanga 3v3 Baloncesto'),
             description: Joi.string().required().example('Quedada casual para jugar unos partidos'),
-            category: Joi.string().valid('SPORT', 'LEISURE').required(),
-            subcategory: Joi.string().valid('BASKETBALL', 'RUNNING', 'ARCADE', 'TCG_BOARDGAMES').required(),
+            category: Joi.string().uppercase().trim().min(2).max(50).required(),
+            subcategory: Joi.string().uppercase().trim().min(2).max(50).required(),
             modality: Joi.string().valid('CASUAL', 'ORGANIZED').default('CASUAL'),
             status: Joi.string().valid('OPEN', 'FULL', 'COMPLETED', 'CANCELLED').default('OPEN'),
 
@@ -143,8 +144,8 @@ export const Schemas = {
             creatorId: Joi.string().regex(OBJECT_ID).optional(),
             title: Joi.string().optional(),
             description: Joi.string().optional(),
-            category: Joi.string().valid('SPORT', 'LEISURE').optional(),
-            subcategory: Joi.string().valid('BASKETBALL', 'RUNNING', 'ARCADE', 'TCG_BOARDGAMES').optional(),
+            category: Joi.string().uppercase().trim().min(2).max(50).optional(),
+            subcategory: Joi.string().uppercase().trim().min(2).max(50).optional(),
             modality: Joi.string().valid('CASUAL', 'ORGANIZED').optional(),
             status: Joi.string().valid('OPEN', 'FULL', 'COMPLETED', 'CANCELLED').optional(),
 
@@ -188,6 +189,41 @@ export const Schemas = {
     },
 
     // ------------------------------------------------------------------------
+    // CATEGORÍAS Y SUBCATEGORÍAS
+    // ------------------------------------------------------------------------
+    category: {
+        create: Joi.object<ICategory>({
+            name: Joi.string().min(2).required(),
+            slug: Joi.string().uppercase().trim().min(2).max(50).required(),
+            subcategories: Joi.array()
+                .items(
+                    Joi.object({
+                        name: Joi.string().min(2).required(),
+                        slug: Joi.string().uppercase().trim().min(2).max(50).required()
+                    })
+                )
+                .default([])
+        }),
+        update: Joi.object<Partial<ICategory>>({
+            name: Joi.string().min(2).optional(),
+            slug: Joi.string().uppercase().trim().min(2).max(50).optional(),
+            subcategories: Joi.array()
+                .items(
+                    Joi.object({
+                        name: Joi.string().min(2).required(),
+                        slug: Joi.string().uppercase().trim().min(2).max(50).required()
+                    })
+                )
+                .optional()
+        }).min(1),
+
+        addSubcategory: Joi.object({
+            name: Joi.string().min(2).required(),
+            slug: Joi.string().uppercase().trim().min(2).max(50).required()
+        })
+    },
+
+    // ------------------------------------------------------------------------
     // REPORTES DE MODERACIÓN
     // ------------------------------------------------------------------------
     report: {
@@ -195,34 +231,34 @@ export const Schemas = {
             targetType: Joi.string().valid('ACTIVITY', 'USER').required(),
             targetId: Joi.string().regex(OBJECT_ID).required(),
             reason: Joi.string().valid('SPAM', 'INAPPROPRIATE', 'NO_SHOW', 'FAKE_LOCATION', 'OTHER').required(),
-            description: Joi.string().min(5).max(1000).required(),
+            description: Joi.string().min(5).max(1000).required()
         }),
-    auth: {
-  register: Joi.object({
-    name: Joi.string().min(2).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-  }),
-  login: Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-  }),
-},
+        auth: {
+            register: Joi.object({
+                name: Joi.string().min(2).required(),
+                email: Joi.string().email().required(),
+                password: Joi.string().min(6).required()
+            }),
+            login: Joi.object({
+                email: Joi.string().email().required(),
+                password: Joi.string().required()
+            })
+        },
 
-user: {
-    create: Joi.object({
-        name: Joi.string().min(2).required(),
-        email: Joi.string().email().required(),
-        password: Joi.string().min(6).required(),
-        role: Joi.string().valid('USER', 'ADMIN').default('USER'),
-    }),
-    update: Joi.object({
-        name: Joi.string().min(2),
-        email: Joi.string().email(),
-        password: Joi.string().min(6),
-        role: Joi.string().valid('USER', 'ADMIN'),
-    }).min(1),
-},
+        user: {
+            create: Joi.object({
+                name: Joi.string().min(2).required(),
+                email: Joi.string().email().required(),
+                password: Joi.string().min(6).required(),
+                role: Joi.string().valid('USER', 'ADMIN').default('USER')
+            }),
+            update: Joi.object({
+                name: Joi.string().min(2),
+                email: Joi.string().email(),
+                password: Joi.string().min(6),
+                role: Joi.string().valid('USER', 'ADMIN')
+            }).min(1)
+        },
 
         update: Joi.object<Partial<IReport>>({
             status: Joi.string().valid('PENDING', 'REVIEWED', 'RESOLVED', 'DISMISSED').optional(),
