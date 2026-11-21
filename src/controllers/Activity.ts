@@ -45,7 +45,10 @@ const readAllPaginated = async (req: Request, res: Response, next: NextFunction)
             subcategory: req.query.subcategory as string,
             status: req.query.status as string,
             showDeleted: req.query.showDeleted === 'true',
-            userRole: req.user?.role
+            userRole: req.user?.role,
+            lat: req.query.lat !== undefined ? Number(req.query.lat) : undefined,
+            lng: req.query.lng !== undefined ? Number(req.query.lng) : undefined,
+            radiusKm: req.query.radiusKm !== undefined ? Number(req.query.radiusKm) : undefined
         });
 
         res.status(200).json(result);
@@ -82,9 +85,7 @@ const joinActivity = async (req: Request<{ activityId: string }>, res: Response,
         }
 
         return res.status(409).json({
-            message: result.status === 'already_joined'
-                ? 'Ya estás apuntado a esta actividad'
-                : 'La actividad no está disponible o ya alcanzó su capacidad'
+            message: result.status === 'already_joined' ? 'Ya estás apuntado a esta actividad' : 'La actividad no está disponible o ya alcanzó su capacidad'
         });
     } catch (error) {
         next(error);

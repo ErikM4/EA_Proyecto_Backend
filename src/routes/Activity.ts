@@ -219,6 +219,48 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Activity'
+ *           examples:
+ *             soloDireccion:
+ *               summary: Solo dirección (geocodificación automática)
+ *               value:
+ *                 title: "Pachanga 3v3 Baloncesto"
+ *                 description: "Partidos casuales de baloncesto por la tarde"
+ *                 category: "SPORT"
+ *                 subcategory: "BASKETBALL"
+ *                 modality: "CASUAL"
+ *                 location:
+ *                   addressName: "Vilanova i la Geltrú, Barcelona"
+ *                   isStoreLocation: false
+ *                 schedule:
+ *                   startTime: "2026-12-10T17:00:00.000Z"
+ *                   endTime: "2026-12-10T19:00:00.000Z"
+ *                 capacity:
+ *                   minParticipants: 2
+ *                   maxParticipants: 6
+ *                 pricing:
+ *                   price: 0
+ *             conCoordenadas:
+ *               summary: Con coordenadas exactas (GeoJSON Point)
+ *               value:
+ *                 title: "Pachanga 3v3 Baloncesto"
+ *                 description: "Partidos casuales de baloncesto por la tarde"
+ *                 category: "SPORT"
+ *                 subcategory: "BASKETBALL"
+ *                 modality: "ORGANIZED"
+ *                 location:
+ *                   type: "Point"
+ *                   coordinates: [1.7254, 41.2241]
+ *                   addressName: "Parc de Baix-a-Mar, Vilanova i la Geltrú"
+ *                   isStoreLocation: false
+ *                 schedule:
+ *                   startTime: "2026-12-10T17:00:00.000Z"
+ *                   endTime: "2026-12-10T19:00:00.000Z"
+ *                 capacity:
+ *                   minParticipants: 2
+ *                   maxParticipants: 6
+ *                 pricing:
+ *                   price: 0
+ *                   prizeInfo: "Camiseta del torneo"
  *     responses:
  *       201:
  *         description: Actividad creada exitosamente
@@ -227,7 +269,7 @@ const router = express.Router();
  *       401:
  *         description: No autorizado
  *       422:
- *         description: Error de validación de Joi
+ *         description: Error de validación de Joi o geocodificación
  */
 router.post('/', VerifyToken, RequireAnyRole('ADMIN', 'STORE_HOST'), ValidateJoi(Schemas.activity.create), controller.createActivity);
 
@@ -242,31 +284,60 @@ router.post('/', VerifyToken, RequireAnyRole('ADMIN', 'STORE_HOST'), ValidateJoi
  *     parameters:
  *       - in: query
  *         name: page
- *         schema: { type: integer, default: 1 }
+ *         schema:
+ *           type: integer
+ *           default: 1
  *       - in: query
  *         name: limit
- *         schema: { type: integer, default: 10 }
+ *         schema:
+ *           type: integer
+ *           default: 10
  *       - in: query
  *         name: sortBy
- *         schema: { type: string, default: createdAt }
+ *         schema:
+ *           type: string
+ *           default: createdAt
  *       - in: query
  *         name: sortOrder
- *         schema: { type: string, enum: [asc, desc], default: desc }
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
  *       - in: query
  *         name: search
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *       - in: query
  *         name: category
- *         schema: { type: string, enum: [SPORT, LEISURE] }
+ *         schema:
+ *           type: string
  *       - in: query
  *         name: subcategory
- *         schema: { type: string, enum: [BASKETBALL, RUNNING, ARCADE, TCG_BOARDGAMES] }
+ *         schema:
+ *           type: string
  *       - in: query
  *         name: status
- *         schema: { type: string, enum: [OPEN, FULL, COMPLETED, CANCELLED] }
+ *         schema:
+ *           type: string
+ *           enum: [OPEN, FULL, COMPLETED, CANCELLED]
  *       - in: query
  *         name: showDeleted
- *         schema: { type: boolean, default: false }
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *       - in: query
+ *         name: lat
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: lng
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: radiusKm
+ *         schema:
+ *           type: number
+ *           default: 10
  *     responses:
  *       200:
  *         description: Listado devuelto con éxito
