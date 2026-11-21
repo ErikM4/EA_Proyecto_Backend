@@ -1,12 +1,11 @@
 import express from 'express';
 import controller from '../controllers/Activity';
 import { ValidateId, ValidateJoi, Schemas } from '../middleware/Joi';
-import VerifyToken, { OptionalVerifyToken, RequireAdmin } from '../middleware/VerifyToken';
+import VerifyToken, { RequireAdmin } from '../middleware/VerifyToken';
 import { RequireAnyRole, RequireRole } from '../middleware/RequireRole';
 
 const router = express.Router();
 
-// ADMIN y STORE_HOST pueden publicar actividades, pero solo ADMIN puede gestionarlas.
 /**
  * @openapi
  * components:
@@ -238,6 +237,8 @@ router.post('/', VerifyToken, RequireAnyRole('ADMIN', 'STORE_HOST'), ValidateJoi
  *   get:
  *     tags: [Activities]
  *     summary: Lista actividades paginadas con filtros
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -269,8 +270,10 @@ router.post('/', VerifyToken, RequireAnyRole('ADMIN', 'STORE_HOST'), ValidateJoi
  *     responses:
  *       200:
  *         description: Listado devuelto con éxito
+ *       401:
+ *         description: No autorizado
  */
-router.get('/', OptionalVerifyToken, controller.readAllPaginated);
+router.get('/', VerifyToken, controller.readAllPaginated);
 
 /**
  * @openapi
@@ -319,6 +322,8 @@ router.post('/:activityId/participants', VerifyToken, RequireRole('USER'), Valid
  *   get:
  *     tags: [Activities]
  *     summary: Obtiene el detalle de una actividad por ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: activityId
@@ -329,10 +334,12 @@ router.post('/:activityId/participants', VerifyToken, RequireRole('USER'), Valid
  *         description: Detalle de la actividad
  *       400:
  *         description: Formato de ID inválido
+ *       401:
+ *         description: No autorizado
  *       404:
  *         description: Actividad no encontrada
  */
-router.get('/:activityId', OptionalVerifyToken, ValidateId('activityId'), controller.readActivity);
+router.get('/:activityId', VerifyToken, ValidateId('activityId'), controller.readActivity);
 
 /**
  * @openapi

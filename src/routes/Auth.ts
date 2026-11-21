@@ -1,19 +1,14 @@
 import express from 'express';
-
 import controller from '../controllers/Auth';
-
 import { Schemas, ValidateJoi } from '../middleware/Joi';
+import VerifyToken from '../middleware/VerifyToken';
 
-// Estas rutas permiten crear una cuenta, iniciar sesión, recuperar el acceso y salir.
 const router = express.Router();
+
 router.post('/register', ValidateJoi(Schemas.auth.register), controller.register);
 router.post('/login', ValidateJoi(Schemas.auth.login), controller.login);
-// La renovación usa la cookie protegida y no necesita datos en el cuerpo.
 router.post('/refresh', controller.refresh);
-router.post('/logout', controller.logout);
-export = router;
-
-// La documentación describe las rutas de autenticación disponibles.
+router.post('/logout', VerifyToken, controller.logout);
 
 /**
  * @openapi
@@ -21,7 +16,7 @@ export = router;
  *   post:
  *     tags: [Auth]
  *     summary: Registra un usuario nuevo
- *     description: El usuario se crea siempre con el rol user. No devuelve token, hay que hacer login despues.
+ *     description: El usuario se crea siempre con el rol USER. No devuelve token, hay que hacer login después.
  *     security: []
  *     requestBody:
  *       required: true
@@ -40,7 +35,7 @@ export = router;
  * /auth/login:
  *   post:
  *     tags: [Auth]
- *     summary: Inicia sesion
+ *     summary: Inicia sesión
  *     description: Devuelve el access token (para la cabecera Authorization), el refresh token y el usuario.
  *     security: []
  *     requestBody:
@@ -57,7 +52,7 @@ export = router;
  *   post:
  *     tags: [Auth]
  *     summary: Pide un access token nuevo
- *     description: Se usa cuando el access token ha caducado o al recargar la pagina. No lleva body, el navegador envia la cookie refreshToken automaticamente.
+ *     description: Se usa cuando el access token ha caducado o al recargar la página. El navegador envía la cookie refreshToken automáticamente.
  *     security: []
  *     responses:
  *       200:
@@ -66,14 +61,18 @@ export = router;
  *           application/json:
  *             example: { token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
  *       401: { $ref: '#/components/responses/Unauthorized' }
- * 
+ *
  * /auth/logout:
  *   post:
  *     tags: [Auth]
- *     summary: Cierra la sesion
- *     description: Borra la cookie refreshToken e invalida ese refresh token en el servidor. No lleva body ni access token.
- *     security: []
+ *     summary: Cierra la sesión
+ *     description: Borra la cookie refreshToken e invalida ese refresh token en el servidor.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       204:
- *         description: Sesion cerrada
+ *         description: Sesión cerrada
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
+
+export default router;
