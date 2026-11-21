@@ -1,4 +1,5 @@
 import Activity, { IActivity } from '../models/Activity';
+import CategoryService from './CategoryService';
 import User from '../models/User';
 
 export interface ActivityQueryParams {
@@ -14,13 +15,21 @@ export interface ActivityQueryParams {
     userRole?: string;
 }
 
-export type JoinActivityResult =
-    | { status: 'joined'; activity: IActivity }
-    | { status: 'not_found' | 'already_joined' | 'unavailable' | 'user_not_allowed' };
+export type JoinActivityResult = { status: 'joined'; activity: IActivity } | { status: 'not_found' | 'already_joined' | 'unavailable' | 'user_not_allowed' };
+
+const assertValidCategory = async (category: string, subcategory: string) => {
+    const isValid = await CategoryService.isValidCategoryPair(category, subcategory);
+    if (!isValid) {
+        const error = new Error('La categoría o subcategoría seleccionada no existe o está archivada') as Error & { status?: number };
+        error.status = 422;
+        throw error;
+    }
+};
 
 // Guardamos la actividad con el identificador de quien la ha publicado.
 // Crear una actividad nueva
-export const createActivity = (data: IActivity) => {
+export const createActivity = async (data: IActivity) => {
+    await assertValidCategory(data.category, data.subcategory);
     const activity = new Activity(data);
     return activity.save();
 };
@@ -121,10 +130,7 @@ export const joinActivity = async (activityId: string, userId: string): Promise<
             status: 'OPEN',
             'participants.userId': { $ne: user._id },
             $expr: {
-                $lt: [
-                    { $size: { $ifNull: ['$participants', []] } },
-                    '$capacity.maxParticipants'
-                ]
+                $lt: [{ $size: { $ifNull: ['$participants', []] } }, '$capacity.maxParticipants']
             }
         },
         {
@@ -164,12 +170,19 @@ export const joinActivity = async (activityId: string, userId: string): Promise<
 };
 
 // Actualiza los campos de una actividad que sigue activa.
-export const updateActivity = (activityId: string, data: Partial<IActivity>) => {
-    return Activity.findOne({ _id: activityId, deleted: false }).then(async (activity) => {
-        if (!activity) return null;
-        Object.assign(activity, data);
-        return activity.save();
-    });
+export const updateActivity = async (activityId: string, data: Partial<IActivity>) => {
+    const activity = await Activity.findOne({ _id: activityId, deleted: false });
+    if (!activity) return null;
+
+    // Validamos la categoría y subcategoría si se han modificado.
+    if (data.category || data.subcategory) {
+        const categoryToCheck = data.category || activity.category;
+        const subcategoryToCheck = data.subcategory || activity.subcategory;
+        await assertValidCategory(categoryToCheck, subcategoryToCheck);
+    }
+
+    Object.assign(activity, data);
+    return activity.save();
 };
 
 // Archiva una actividad sin quitarla de la base de datos.

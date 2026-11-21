@@ -4,7 +4,8 @@ import Logging from './library/Logging';
 import User from './models/User';
 import Activity from './models/Activity';
 import Report from './models/Report';
-import { DEFAULT_ADMIN, SEED_USERS, getSeedActivities, getSeedReports } from './seed-data';
+import Category from './models/Category';
+import { DEFAULT_ADMIN, SEED_USERS, getSeedActivities, getSeedReports, getSeedCategories } from './seed-data';
 
 // Carga los datos iniciales definidos en el archivo de datos.
 // La opción de reinicio borra las colecciones antes de volver a cargarlas.
@@ -20,16 +21,20 @@ const seed = async () => {
         const usersDeleted = await User.deleteMany({});
         const activitiesDeleted = await Activity.deleteMany({});
         const reportsDeleted = await Report.deleteMany({});
+        const categoriesDeleted = await Category.deleteMany({});
 
-        Logging.warning(`Borrados ${usersDeleted.deletedCount} usuarios, ${activitiesDeleted.deletedCount} actividades y ${reportsDeleted.deletedCount} reportes`);
+        Logging.warning(
+            `Borrados ${usersDeleted.deletedCount} usuarios, ${activitiesDeleted.deletedCount} actividades, ${reportsDeleted.deletedCount} reportes y ${categoriesDeleted.deletedCount} categorías de la base de datos.`
+        );
     }
 
     const usersInDb = await User.countDocuments();
     const activitiesInDb = await Activity.countDocuments();
     const reportsInDb = await Report.countDocuments();
+    const categoriesInDb = await Category.countDocuments();
 
     // Conservamos los datos actuales y dejamos disponible la cuenta de administrador.
-    if (usersInDb > 0 || activitiesInDb > 0 || reportsInDb > 0) {
+    if (usersInDb > 0 || activitiesInDb > 0 || reportsInDb > 0 || categoriesInDb > 0) {
         const existingAdmin = await User.findOne({
             email: DEFAULT_ADMIN.email,
             deleted: false
@@ -69,6 +74,10 @@ const seed = async () => {
     }
 
     const activitiesData = getSeedActivities(adminUser._id.toString(), storeUser._id.toString(), standardUser._id.toString());
+
+    const categoriesData = getSeedCategories();
+    const createdCategories = await Category.insertMany(categoriesData);
+    Logging.info(`Categorías creadas: ${createdCategories.length}`);
 
     const createdActivities = await Activity.insertMany(activitiesData);
     Logging.info(`Actividades creadas: ${createdActivities.length}`);
