@@ -39,6 +39,13 @@ export const ValidateId = (paramName: string) => {
     };
 };
 
+const coordinatesSchema = Joi.array()
+    .ordered(
+        Joi.number().min(-180).max(180).required(), // longitud
+        Joi.number().min(-90).max(90).required() // latitud
+    )
+    .length(2);
+
 // ============================================================================
 // ESQUEMAS DE VALIDACIÓN DE LA APLICACIÓN
 // ============================================================================
@@ -95,8 +102,8 @@ export const Schemas = {
 
             location: Joi.object({
                 type: Joi.string().valid('Point').default('Point'),
-                coordinates: Joi.array().items(Joi.number()).length(2).optional().example([2.0003, 41.2755]),
-                addressName: Joi.string().required().example('Pistas UPC Castelldefels'),
+                coordinates: coordinatesSchema.optional().example([-3.123456, 40.123456]),
+                addressName: Joi.string().trim().min(2).max(200).required().example('Pistas UPC Castelldefels'),
                 isStoreLocation: Joi.boolean().default(false)
             }).required(),
 
@@ -151,10 +158,10 @@ export const Schemas = {
 
             location: Joi.object({
                 type: Joi.string().valid('Point').default('Point'),
-                coordinates: Joi.array().items(Joi.number()).length(2).optional(),
-                addressName: Joi.string().optional(),
-                isStoreLocation: Joi.boolean().optional()
-            }).optional(),
+                coordinates: coordinatesSchema.optional().example([-3.123456, 40.123456]),
+                addressName: Joi.string().trim().min(2).max(200).required().example('Pistas UPC Castelldefels'),
+                isStoreLocation: Joi.boolean().default(false)
+            }).required(),
 
             route: Joi.object({
                 distanceKm: Joi.number().min(0).optional(),

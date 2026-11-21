@@ -1,6 +1,7 @@
-import Activity, { IActivity } from '../models/Activity';
-import CategoryService from './CategoryService';
+import Activity, { IActivity, IActivityLocation } from '../models/Activity';
 import User from '../models/User';
+import CategoryService from './CategoryService';
+import GeocodingService from './GeocodingService';
 
 export interface ActivityQueryParams {
     page?: number;
@@ -13,7 +14,36 @@ export interface ActivityQueryParams {
     status?: string;
     showDeleted?: boolean;
     userRole?: string;
+    lat?: number;
+    lng?: number;
+    radiusKm?: number;
 }
+
+const resolveLocationCoordinates = async (location: IActivityLocation): Promise<IActivityLocation> => {
+    const hasCoordinates = Array.isArray(location.coordinates) && location.coordinates.length === 2;
+
+    if (hasCoordinates) {
+        return {
+            ...location,
+            type: 'Point'
+        };
+    }
+
+    const resolved = await GeocodingService.geocodeAddress(location.addressName);
+    if (!resolved) {
+        const error = new Error(
+            `No se pudieron resolver las coordenadas para la dirección "${location.addressName}". Indica una dirección más precisa o envía coordinates [longitud, latitud].`
+        ) as Error & { status?: number };
+        error.status = 422;
+        throw error;
+    }
+
+    return {
+        ...location,
+        type: 'Point',
+        coordinates: resolved
+    };
+};
 
 export type JoinActivityResult = { status: 'joined'; activity: IActivity } | { status: 'not_found' | 'already_joined' | 'unavailable' | 'user_not_allowed' };
 
@@ -30,7 +60,11 @@ const assertValidCategory = async (category: string, subcategory: string) => {
 // Crear una actividad nueva
 export const createActivity = async (data: IActivity) => {
     await assertValidCategory(data.category, data.subcategory);
-    const activity = new Activity(data);
+    const resolvedLocation = await resolveLocationCoordinates(data.location);
+    const activity = new Activity({
+        ...data,
+        location: resolvedLocation
+    });
     return activity.save();
 };
 
@@ -80,6 +114,16 @@ export const getAllActivitiesPaginated = async (params: ActivityQueryParams) => 
     if (params.category) filter.category = params.category;
     if (params.subcategory) filter.subcategory = params.subcategory;
     if (params.status) filter.status = params.status;
+    if (params.lat !== undefined && params.lng !== undefined && !Number.isNaN(params.lat) && !Number.isNaN(params.lng)) {
+        const radiusKm = params.radiusKm && params.radiusKm > 0 ? params.radiusKm : 10;
+        const earthRadiusKm = 6378.1;
+
+        filter.location = {
+            $geoWithin: {
+                $centerSphere: [[params.lng, params.lat], radiusKm / earthRadiusKm]
+            }
+        };
+    }
 
     // Pedimos los resultados y el total a la vez para reducir el tiempo de respuesta.
     const [activities, totalCount] = await Promise.all([
@@ -179,6 +223,18 @@ export const updateActivity = async (activityId: string, data: Partial<IActivity
         const categoryToCheck = data.category || activity.category;
         const subcategoryToCheck = data.subcategory || activity.subcategory;
         await assertValidCategory(categoryToCheck, subcategoryToCheck);
+    }
+
+    if (data.location) {
+        const addressChanged = Boolean(data.location.addressName && data.location.addressName !== activity.location.addressName);
+        const mergedLocation: IActivityLocation = {
+            type: 'Point',
+            addressName: data.location.addressName ?? activity.location.addressName,
+            isStoreLocation: data.location.isStoreLocation ?? activity.location.isStoreLocation,
+            coordinates: data.location.coordinates ?? (addressChanged ? undefined : activity.location.coordinates)
+        };
+
+        data.location = await resolveLocationCoordinates(mergedLocation);
     }
 
     Object.assign(activity, data);

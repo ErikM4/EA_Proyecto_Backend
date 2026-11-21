@@ -40,7 +40,7 @@ export interface IActivity {
     modality: ActivityModality;
     status: ActivityStatus;
 
-    location?: IActivityLocation;
+    location: IActivityLocation;
     route?: IActivityRoute;
 
     schedule: {
@@ -84,7 +84,7 @@ const ActivitySchema: Schema = new Schema(
         },
         location: {
             type: { type: String, enum: ['Point'], default: 'Point', required: true },
-            coordinates: { type: [Number] },
+            coordinates: { type: [Number], required: true }, // [longitud, latitud]
             addressName: { type: String, required: true, trim: true },
             isStoreLocation: { type: Boolean, default: false }
         },
@@ -127,6 +127,6 @@ const ActivitySchema: Schema = new Schema(
 );
 
 // Índice GeoEspecial 2dsphere para permitir búsquedas eficientes por cercanía en el mapa
-//ActivitySchema.index({ 'location.coordinates': '2dsphere' });
+ActivitySchema.index({ location: '2dsphere' });
 
 export default mongoose.model<IActivityModel>('Activity', ActivitySchema);
