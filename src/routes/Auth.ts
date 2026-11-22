@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post('/register', ValidateJoi(Schemas.auth.register), controller.register);
 router.post('/login', ValidateJoi(Schemas.auth.login), controller.login);
+router.post('/backoffice/login', ValidateJoi(Schemas.auth.login), controller.backofficeLogin);
 router.post('/refresh', controller.refresh);
 router.post('/logout', VerifyToken, controller.logout);
 
@@ -46,6 +47,27 @@ router.post('/logout', VerifyToken, controller.logout);
  *     responses:
  *       200: { $ref: '#/components/responses/LoginOk' }
  *       401: { $ref: '#/components/responses/BadCredentials' }
+ *       422: { $ref: '#/components/responses/Unprocessable' }
+ *
+ * /auth/backoffice/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Inicia sesión exclusivo para administradores del Backoffice
+ *     description: Valida las credenciales y comprueba que el usuario tenga el rol ADMIN antes de emitir tokens.
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/LoginInput' }
+ *     responses:
+ *       200: { $ref: '#/components/responses/LoginOk' }
+ *       401: { $ref: '#/components/responses/BadCredentials' }
+ *       403:
+ *         description: Acceso denegado por falta de rol ADMIN
+ *         content:
+ *           application/json:
+ *             example: { message: 'Acceso denegado. Se requieren permisos de administrador.' }
  *       422: { $ref: '#/components/responses/Unprocessable' }
  *
  * /auth/refresh:
