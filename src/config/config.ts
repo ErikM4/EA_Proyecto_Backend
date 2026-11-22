@@ -15,9 +15,12 @@ const required = (name: string) => {
     return value;
 };
 
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/seminari7';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/Proyecto';
 
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:4200';
+const CORS_ORIGINS = (process.env.CORS_ORIGIN || 'http://localhost:4200,http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean);
 
 const SERVER_PORT = process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 1337;
 
@@ -39,7 +42,7 @@ export const config = {
         port: SERVER_PORT
     },
     cors: {
-        origin: CORS_ORIGIN
+        origin: CORS_ORIGINS
     },
     jwt: {
         secret: JWT_SECRET,

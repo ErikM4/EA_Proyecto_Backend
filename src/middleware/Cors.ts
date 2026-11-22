@@ -6,7 +6,7 @@ import { config } from '../config/config';
 // De las peticiones OPTIONS (las que manda el navegador antes de la real) se encarga
 // el propio paquete cors.
 export const corsOptions: CorsOptions = {
-    origin: config.cors.origin,
+    origin: config.cors.origin,   // ahora es string[]
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
