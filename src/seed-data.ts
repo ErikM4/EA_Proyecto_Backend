@@ -49,8 +49,8 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
         status: 'OPEN',
         location: {
             type: 'Point',
-            coordinates: [2.0003, 41.2755],
-            addressName: 'Pistas Campus PMT UPC, Castelldefels',
+            coordinates: [1.986612, 41.275648],
+            addressName: "Carrer d'Esteve Terradas 7, 08860, Castelldefels, Cataluña",
             isStoreLocation: false
         },
         schedule: {
@@ -82,8 +82,8 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
         status: 'OPEN',
         location: {
             type: 'Point',
-            coordinates: [2.17, 41.387],
-            addressName: 'Carrer Major 15, Goblin Games',
+            coordinates: [2.159421, 41.392483],
+            addressName: 'Carrer de Balmes 100, 08008, Barcelona, Cataluña',
             isStoreLocation: true
         },
         schedule: {
@@ -110,8 +110,8 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
         status: 'OPEN',
         location: {
             type: 'Point',
-            coordinates: [1.98, 41.265],
-            addressName: 'Monumento Rosa dels Vents',
+            coordinates: [1.732453, 41.217723],
+            addressName: 'Passeig Marítim 45, 08800, Vilanova i la Geltrú, Cataluña',
             isStoreLocation: false
         },
         route: {
@@ -120,9 +120,9 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
             path: {
                 type: 'LineString',
                 coordinates: [
-                    [1.98, 41.265],
-                    [1.985, 41.267],
-                    [1.99, 41.269]
+                    [1.732453, 41.217723],
+                    [1.73812, 41.21941],
+                    [1.74458, 41.22105]
                 ]
             }
         },
