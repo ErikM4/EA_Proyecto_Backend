@@ -54,6 +54,30 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+// Login para el backoffice (sólo admins)
+const backofficeLogin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await AuthService.login(req.body.email, req.body.password);
+
+        if (!result) {
+            return res.status(401).json({ message: 'Email o contraseña incorrectos' });
+        }
+
+        if (result.user.role !== 'ADMIN') {
+            return res.status(403).json({ message: 'Acceso denegado: se requieren permisos de administrador.' });
+        }
+
+        res.cookie('refreshToken', result.refreshToken, {
+            ...refreshCookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.status(200).json({ token: result.token, user: result.user });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Esta función permite recuperar la sesión usando la cookie de renovación
 const refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -101,4 +125,4 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export default { register, login, refresh, logout };
+export default { register, login, backofficeLogin, refresh, logout };

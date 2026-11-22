@@ -22,10 +22,10 @@ interface ChatJoinPayload {
 interface AuthenticatedSocket extends Socket {
     userId: string;
     userName: string;
+    userRole: string;
 }
 
-const isAccessTokenPayload = (payload: string | jwt.JwtPayload): payload is jwt.JwtPayload & AccessTokenPayload =>
-    typeof payload !== 'string' && typeof payload.sub === 'string';
+const isAccessTokenPayload = (payload: string | jwt.JwtPayload): payload is jwt.JwtPayload & AccessTokenPayload => typeof payload !== 'string' && typeof payload.sub === 'string';
 
 const isAllowedRoom = (room: string, userId: string): boolean => {
     // Las salas generales y de grupo están disponibles para cualquier usuario conectado.
@@ -39,29 +39,29 @@ const isAllowedRoom = (room: string, userId: string): boolean => {
     return room === `direct:${firstId}:${secondId}` && [firstId, secondId].includes(userId.toLowerCase());
 };
 
-const canAccessRoom = async (room: string, userId: string): Promise<boolean> => {
+const canAccessRoom = async (room: string, userId: string, userRole: string): Promise<boolean> => {
+    // Las salas internas con prefijo "admin:" son exclusivas para cuentas ADMIN.
+    if (/^admin:[A-Za-z0-9_-]{1,100}$/.test(room)) {
+        return userRole === 'ADMIN';
+    }
+
     if (isAllowedRoom(room, userId)) return true;
 
     const activityRoom = /^activity:([a-f\d]{24})$/i.exec(room);
     if (!activityRoom) return false;
 
     // Una sala de actividad solo está disponible para sus participantes.
-    return Boolean(await Activity.exists({
-        _id: activityRoom[1],
-        deleted: false,
-        deletedAt: null,
-        'participants.userId': userId
-    }));
+    return Boolean(
+        await Activity.exists({
+            _id: activityRoom[1],
+            deleted: false,
+            deletedAt: null,
+            'participants.userId': userId
+        })
+    );
 };
 
-const toClientMessage = (message: {
-    _id: mongoose.Types.ObjectId;
-    room: string;
-    userId: mongoose.Types.ObjectId;
-    userName: string;
-    text: string;
-    createdAt: Date;
-}) => ({
+const toClientMessage = (message: { _id: mongoose.Types.ObjectId; room: string; userId: mongoose.Types.ObjectId; userName: string; text: string; createdAt: Date }) => ({
     _id: String(message._id),
     room: message.room,
     user: { _id: String(message.userId), name: message.userName },
@@ -91,12 +91,13 @@ export const attachChat = (httpServer: HttpServer): Server => {
                 _id: payload.sub,
                 deleted: false,
                 isBanned: false
-            }).select('_id name');
+            }).select('_id name role');
             if (!user) throw new Error('User is unavailable');
 
             const authenticatedSocket = socket as AuthenticatedSocket;
             authenticatedSocket.userId = String(user._id);
             authenticatedSocket.userName = user.name;
+            authenticatedSocket.userRole = user.role;
             next();
         } catch {
             next(new Error('Authentication error'));
@@ -118,16 +119,13 @@ export const attachChat = (httpServer: HttpServer): Server => {
 
             try {
                 // Comprobamos los permisos antes de entrar y leer mensajes anteriores.
-                if (!await canAccessRoom(payload.room, socket.userId)) {
+                if (!(await canAccessRoom(payload.room, socket.userId, socket.userRole))) {
                     socket.emit('chat:error', { message: 'No tienes permiso para entrar en esta sala.' });
                     return;
                 }
 
                 await socket.join(payload.room);
-                const recentMessages = await ChatMessage.find({ room: payload.room })
-                    .sort({ createdAt: -1 })
-                    .limit(50)
-                    .lean();
+                const recentMessages = await ChatMessage.find({ room: payload.room }).sort({ createdAt: -1 }).limit(50).lean();
 
                 socket.emit('chat:history', recentMessages.reverse().map(toClientMessage));
             } catch (error) {
@@ -137,11 +135,7 @@ export const attachChat = (httpServer: HttpServer): Server => {
         });
 
         socket.on('chat:message', async (payload: ChatMessagePayload) => {
-            if (
-                typeof payload?.room !== 'string' ||
-                !socket.rooms.has(payload.room) ||
-                typeof payload.text !== 'string'
-            ) {
+            if (typeof payload?.room !== 'string' || !socket.rooms.has(payload.room) || typeof payload.text !== 'string') {
                 socket.emit('chat:error', { message: 'Mensaje o sala no válidos.' });
                 return;
             }
@@ -155,7 +149,7 @@ export const attachChat = (httpServer: HttpServer): Server => {
 
             try {
                 // El autor se toma de la conexión autenticada y no de los datos del navegador.
-                if (!await canAccessRoom(payload.room, socket.userId)) {
+                if (!(await canAccessRoom(payload.room, socket.userId, socket.userRole))) {
                     socket.emit('chat:error', { message: 'No tienes permiso para enviar mensajes en esta sala.' });
                     return;
                 }
