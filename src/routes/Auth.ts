@@ -9,7 +9,7 @@ router.post('/register', ValidateJoi(Schemas.auth.register), controller.register
 router.post('/login', ValidateJoi(Schemas.auth.login), controller.login);
 router.post('/backoffice/login', ValidateJoi(Schemas.auth.login), controller.backofficeLogin);
 router.post('/refresh', controller.refresh);
-router.post('/logout', VerifyToken, controller.logout);
+router.post('/logout', controller.logout);
 
 /**
  * @openapi
