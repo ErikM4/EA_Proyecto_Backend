@@ -54,7 +54,7 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
             isStoreLocation: false
         },
         schedule: {
-            startTime: new Date(Date.now() + 86400000), // Empieza dentro de un día.
+            startTime: new Date(Date.now() + 86400000), // +1 día
             endTime: new Date(Date.now() + 93600000)
         },
         capacity: {
@@ -87,7 +87,7 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
             isStoreLocation: true
         },
         schedule: {
-            startTime: new Date(Date.now() + 172800000), // Empieza dentro de dos días.
+            startTime: new Date(Date.now() + 172800000), // +2 días
             endTime: new Date(Date.now() + 187200000)
         },
         capacity: {
@@ -127,7 +127,7 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
             }
         },
         schedule: {
-            startTime: new Date(Date.now() + 259200000), // Empieza dentro de tres días.
+            startTime: new Date(Date.now() + 259200000), // +3 días
             endTime: new Date(Date.now() + 262800000)
         },
         capacity: {
@@ -136,6 +136,287 @@ export const getSeedActivities = (adminId: string, storeId: string, userId: stri
         },
         pricing: {
             price: 0
+        },
+        participants: []
+    },
+    {
+        creatorId: storeId,
+        title: 'Noche Retro Arcade & Street Fighter',
+        description: 'Sesión libre de recreativas clásicas y mini torneo eliminatorio de Street Fighter III.',
+        category: 'LEISURE',
+        subcategory: 'ARCADE',
+        modality: 'ORGANIZED',
+        status: 'OPEN',
+        location: {
+            type: 'Point',
+            coordinates: [2.174401, 41.398371],
+            addressName: 'Carrer de Marina 165, 08013, Barcelona, Cataluña',
+            isStoreLocation: true
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 345600000), // +4 días
+            endTime: new Date(Date.now() + 356400000)
+        },
+        capacity: {
+            minParticipants: 4,
+            maxParticipants: 12
+        },
+        pricing: {
+            price: 3.5,
+            prizeInfo: 'Vale de 15€ en consumiciones y fichas extra'
+        },
+        participants: [
+            {
+                userId: storeId,
+                name: 'GameZone Store',
+                joinedAt: new Date()
+            }
+        ]
+    },
+    {
+        creatorId: adminId,
+        title: 'Torneo Relámpago 5v5 Baloncesto',
+        description: 'Competición amateur por equipos en pabellón cubierto. Plazas completas.',
+        category: 'SPORT',
+        subcategory: 'BASKETBALL',
+        modality: 'ORGANIZED',
+        status: 'FULL',
+        location: {
+            type: 'Point',
+            coordinates: [2.114952, 41.380896],
+            addressName: 'Avinguda Diagonal 695, 08028, Barcelona, Cataluña',
+            isStoreLocation: false
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 432000000), // +5 días
+            endTime: new Date(Date.now() + 446400000)
+        },
+        capacity: {
+            minParticipants: 2,
+            maxParticipants: 2
+        },
+        pricing: {
+            price: 10,
+            prizeInfo: 'Trofeo y equipación deportiva para el equipo ganador'
+        },
+        participants: [
+            {
+                userId: userId,
+                name: 'Marc R.',
+                joinedAt: new Date()
+            },
+            {
+                userId: adminId,
+                name: 'Admin',
+                joinedAt: new Date()
+            }
+        ]
+    },
+    {
+        creatorId: storeId,
+        title: 'Tarde de Juegos de Mesa: Catan y Carcassonne',
+        description: 'Trae tus juegos o prueba los de la ludoteca de la tienda. Ideal para principiantes.',
+        category: 'LEISURE',
+        subcategory: 'TCG_BOARDGAMES',
+        modality: 'CASUAL',
+        status: 'OPEN',
+        location: {
+            type: 'Point',
+            coordinates: [1.978122, 41.280145],
+            addressName: 'Avinguda de la Constitució 112, 08860, Castelldefels, Cataluña',
+            isStoreLocation: true
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 518400000), // +6 días
+            endTime: new Date(Date.now() + 529200000)
+        },
+        capacity: {
+            minParticipants: 3,
+            maxParticipants: 8
+        },
+        pricing: {
+            price: 0
+        },
+        participants: []
+    },
+    {
+        creatorId: userId,
+        title: 'Series en Pista Atletismo 10x400m',
+        description: 'Entrenamiento interválico exigente para preparar 10K sub-40.',
+        category: 'SPORT',
+        subcategory: 'RUNNING',
+        modality: 'CASUAL',
+        status: 'OPEN',
+        location: {
+            type: 'Point',
+            coordinates: [2.04421, 41.32154],
+            addressName: 'Carrer de la Muntañeta 1, 08830, Sant Boi de Llobregat, Cataluña',
+            isStoreLocation: false
+        },
+        route: {
+            distanceKm: 8.0,
+            paceTarget: '4:05 min/km',
+            path: {
+                type: 'LineString',
+                coordinates: [
+                    [2.04421, 41.32154],
+                    [2.0451, 41.3223]
+                ]
+            }
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 604800000), // +7 días
+            endTime: new Date(Date.now() + 610200000)
+        },
+        capacity: {
+            minParticipants: 2,
+            maxParticipants: 6
+        },
+        pricing: {
+            price: 0
+        },
+        participants: []
+    },
+    {
+        creatorId: storeId,
+        title: 'Draft Magic: The Gathering',
+        description: 'Formato Booster Draft con 3 sobres por jugador. Rondas suizas.',
+        category: 'LEISURE',
+        subcategory: 'TCG_BOARDGAMES',
+        modality: 'ORGANIZED',
+        status: 'OPEN',
+        location: {
+            type: 'Point',
+            coordinates: [2.159421, 41.392483],
+            addressName: 'Carrer de Balmes 100, 08008, Barcelona, Cataluña',
+            isStoreLocation: true
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 691200000), // +8 días
+            endTime: new Date(Date.now() + 705600000)
+        },
+        capacity: {
+            minParticipants: 6,
+            maxParticipants: 8
+        },
+        pricing: {
+            price: 15,
+            prizeInfo: 'Sobres Promo Foil para los 3 primeros'
+        },
+        participants: []
+    },
+    {
+        creatorId: userId,
+        title: 'Quedada Pinball y Ritmo (DDR / Pump It Up)',
+        description: 'Tarde casual probando máquinas de baile y pinballs clásicos.',
+        category: 'LEISURE',
+        subcategory: 'ARCADE',
+        modality: 'CASUAL',
+        status: 'OPEN',
+        location: {
+            type: 'Point',
+            coordinates: [2.126891, 41.358742],
+            addressName: 'Avinguda de la Granvia 75, 08908, L’Hospitalet de Llobregat, Cataluña',
+            isStoreLocation: false
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 777600000), // +9 días
+            endTime: new Date(Date.now() + 788400000)
+        },
+        capacity: {
+            minParticipants: 2,
+            maxParticipants: 6
+        },
+        pricing: {
+            price: 0
+        },
+        participants: []
+    },
+    {
+        creatorId: adminId,
+        title: 'Entrenamiento Tiro Libre y Triple Basket',
+        description: 'Sesión pasada realizada la semana anterior para probar historial completado.',
+        category: 'SPORT',
+        subcategory: 'BASKETBALL',
+        modality: 'CASUAL',
+        status: 'COMPLETED',
+        location: {
+            type: 'Point',
+            coordinates: [1.986612, 41.275648],
+            addressName: "Carrer d'Esteve Terradas 7, 08860, Castelldefels, Cataluña",
+            isStoreLocation: false
+        },
+        schedule: {
+            startTime: new Date(Date.now() - 172800000), // Hace 2 días
+            endTime: new Date(Date.now() - 165600000)
+        },
+        capacity: {
+            minParticipants: 2,
+            maxParticipants: 8
+        },
+        pricing: {
+            price: 0
+        },
+        participants: [
+            {
+                userId: userId,
+                name: 'Marc R.',
+                joinedAt: new Date(Date.now() - 259200000)
+            }
+        ]
+    },
+    {
+        creatorId: userId,
+        title: 'Trail Nocturno Montjuïc',
+        description: 'Actividad cancelada por previsión de lluvia fuerte.',
+        category: 'SPORT',
+        subcategory: 'RUNNING',
+        modality: 'ORGANIZED',
+        status: 'CANCELLED',
+        location: {
+            type: 'Point',
+            coordinates: [2.152694, 41.364133],
+            addressName: 'Passeig Olímpic 15, 08038, Barcelona, Cataluña',
+            isStoreLocation: false
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 86400000),
+            endTime: new Date(Date.now() + 93600000)
+        },
+        capacity: {
+            minParticipants: 5,
+            maxParticipants: 20
+        },
+        pricing: {
+            price: 2.0
+        },
+        participants: []
+    },
+    {
+        creatorId: storeId,
+        title: 'Campeonato Tekken 8 en Recreative Hub',
+        description: 'Torneo presencial 1v1 a doble eliminación.',
+        category: 'LEISURE',
+        subcategory: 'ARCADE',
+        modality: 'ORGANIZED',
+        status: 'FULL',
+        location: {
+            type: 'Point',
+            coordinates: [2.174401, 41.398371],
+            addressName: 'Carrer de Marina 165, 08013, Barcelona, Cataluña',
+            isStoreLocation: true
+        },
+        schedule: {
+            startTime: new Date(Date.now() + 864000000), // +10 días
+            endTime: new Date(Date.now() + 878400000)
+        },
+        capacity: {
+            minParticipants: 4,
+            maxParticipants: 4
+        },
+        pricing: {
+            price: 6.0,
+            prizeInfo: 'Mando Arcade Stick personalizado para el campeón'
         },
         participants: []
     }
