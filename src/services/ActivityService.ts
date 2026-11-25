@@ -213,6 +213,33 @@ export const joinActivity = async (activityId: string, userId: string): Promise<
     return { status: 'joined', activity };
 };
 
+type LeaveActivityResult = { status: 'left'; activity: IActivity } | { status: 'not_found' } | { status: 'not_joined' } | { status: 'not_allowed_status' };
+
+const leaveActivity = async (activityId: string, userId: string): Promise<LeaveActivityResult> => {
+    const activity = await Activity.findOne({ _id: activityId, deleted: { $ne: true } });
+    if (!activity) {
+        return { status: 'not_found' };
+    }
+
+    if (activity.status === 'COMPLETED' || activity.status === 'CANCELLED') {
+        return { status: 'not_allowed_status' };
+    }
+
+    const initialCount = activity.participants.length;
+    activity.participants = activity.participants.filter((p) => p.userId.toString() !== userId);
+
+    if (activity.participants.length === initialCount) {
+        return { status: 'not_joined' };
+    }
+
+    if (activity.status === 'FULL' && activity.participants.length < activity.capacity.maxParticipants) {
+        activity.status = 'OPEN';
+    }
+
+    await activity.save();
+    return { status: 'left', activity };
+};
+
 // Actualiza los campos de una actividad que sigue activa.
 export const updateActivity = async (activityId: string, data: Partial<IActivity>) => {
     const activity = await Activity.findOne({ _id: activityId, deleted: false });
@@ -272,6 +299,7 @@ export default {
     getAllActivitiesPaginated,
     getJoinedActivities,
     joinActivity,
+    leaveActivity,
     updateActivity,
     softDeleteActivity,
     restoreActivity,

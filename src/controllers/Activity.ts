@@ -92,6 +92,26 @@ const joinActivity = async (req: Request<{ activityId: string }>, res: Response,
     }
 };
 
+const leaveActivity = async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
+    try {
+        const result = await ActivityService.leaveActivity(req.params.activityId, req.user!.id);
+
+        if (result.status === 'left') {
+            return res.status(200).json({ activity: result.activity });
+        }
+
+        if (result.status === 'not_found') {
+            return res.status(404).json({ message: 'Actividad no encontrada o archivada' });
+        }
+
+        return res.status(409).json({
+            message: result.status === 'not_joined' ? 'No estás apuntado a esta actividad' : 'No puedes desapuntarte de una actividad finalizada o cancelada'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Actualizar una actividad
 const updateActivity = async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
     const activityId = req.params.activityId;
@@ -192,6 +212,7 @@ export default {
     readAllPaginated,
     readJoinedActivities,
     joinActivity,
+    leaveActivity,
     updateActivity,
     softDeleteActivity,
     restoreActivity,
