@@ -389,6 +389,31 @@ router.post('/:activityId/participants', VerifyToken, RequireRole('USER'), Valid
 
 /**
  * @openapi
+ * /activities/{activityId}/participants:
+ *   delete:
+ *     tags: [Activities]
+ *     summary: Cancela la inscripción del usuario autenticado en una actividad
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: activityId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Inscripción cancelada
+ *       403:
+ *         description: Se requiere un usuario activo con rol USER
+ *       404:
+ *         description: Actividad no encontrada o archivada
+ *       409:
+ *         description: El usuario no estaba inscrito o la actividad ya finalizó/se canceló
+ */
+router.delete('/:activityId/participants', VerifyToken, RequireRole('USER'), ValidateId('activityId'), controller.leaveActivity);
+
+/**
+ * @openapi
  * /activities/{activityId}:
  *   get:
  *     tags: [Activities]
